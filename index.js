@@ -89,8 +89,8 @@ async function predict() {
     pushUpStart = 0;
     }
 
-    ui.writePushups(pushUpCount.toFixed() + '   LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed());
-
+    ui.writePushups(pushUpCount.toFixed());
+    console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed())
     //const classId = (await predictedClass.data())[0];
     img.dispose();
 
@@ -113,10 +113,6 @@ async function getImage() {
 
 function startTimer () {
   const timeInSeconds = Math.round(timer.getTime() / 1000);
-
-  //seconds = timeInSeconds % 60;
-  //minutes= Math.floor(timeInSeconds / 60);
-    
   if ((seconds+60*minutes)<timeInSeconds){
     seconds = timeInSeconds % 60;
     minutes= Math.floor(timeInSeconds / 60);
@@ -134,15 +130,6 @@ function startTimer () {
     else if (seconds < 5 && minutes > 9){
       appendMinutes.innerHTML = minutes;
     } 
-    /**if (seconds > 59) {
-      minutes++;
-      appendMinutes.innerHTML = "0" + minutes;
-      seconds = 0;
-      appendSeconds.innerHTML = "0" + 0;
-    }
-    if (minutes > 9){
-      appendMinutes.innerHTML = minutes;
-    }**/
 
 }
 }
@@ -184,8 +171,8 @@ buttonReset.onclick = function() {
 
   seconds = 00;
   minutes = 00;
-  appendSeconds.innerHTML = seconds;
-  appendMinutes.innerHTML = minutes;
+  appendSeconds.innerHTML = "0" + seconds;
+  appendMinutes.innerHTML = "0" + minutes;
   timer.reset ();
 }
 

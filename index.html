@@ -17,6 +17,7 @@ limitations under the License.
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SmartGym</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-teal.min.css" />
@@ -38,19 +39,12 @@ limitations under the License.
 
   <div class="controller-panels" id="controller" style="display:none">
 
-    <div class="panel training-panel">
+    <div class="panel">
 
-      <!-- new buttons.
-      <div class="wrapper">
-        <p><span id="seconds">00</span>:<span id="tens">00</span></p>
-        <button id="button-start">Start</button>
-        <button id="button-stop">Stop</button>
-        <button id="button-reset">Reset</button>
-        </div> 
-        /new buttons. -->
-
-      <div class="wrapper">
-        <p>Time:<span id="minutes">00</span>:<span id="seconds">00</span>   Push-ups: <span id="pushups">0</span></p>
+      <div class="main-text">
+        <p id="maintext">
+          Push-ups: <span id="pushups">0</span> &nbsp;&nbsp;&nbsp;&nbsp;
+          Time: <span id="minutes">00</span>:<span id="seconds">00</span></p>
       </div>
 
       <!-- Big buttons. -->
@@ -78,7 +72,7 @@ limitations under the License.
           </div>
 
           <!-- Batch size -->
-          <div class="dropdown">
+          <div class="dropdown" id="dropdown2">
             <label>Batch size</label>
             <div class="select">
               <select id="batchSizeFraction">
