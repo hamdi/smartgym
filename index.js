@@ -44,9 +44,9 @@ let model;
 
 // Loads detector and returns a model that returns the internal activation
 // we'll use as input to our classifier model.
-async function loadModel() {
+async function loadModel(model_name) {
   const detector = await tf.loadGraphModel(
-    'https://storage.googleapis.com/tfjs-models/tfjs/movenet_v4/lightning/float16/model.json');
+    'https://storage.googleapis.com/tfjs-models/tfjs/movenet_v4/'+model_name+'/float16/model.json');
   return detector;
 }
 
@@ -78,19 +78,24 @@ async function predict() {
     const right_elbow = {x:results[8][0], y:results[8][1]};
     const left_shoulder = {x:results[5][0], y:results[5][1]};
     const right_shoulder = {x:results[6][0], y:results[6][1]};
-    
+
     const left_angle = find_angle(left_shoulder, left_elbow, left_wrist);
     const right_angle = find_angle(right_shoulder, right_elbow, right_wrist);
 
-    if ((left_angle < 110) && (right_angle < 110)){
+    const left_conf = (results[9][2] + results[7][2] +results[5][2])/3;
+    const right_conf = (results[10][2] + results[8][2] +results[8][2])/3;
+
+    if ((left_angle < 110) && (right_angle < 110) && (left_conf>0.5) && (right_conf>0.5)){
     pushUpStart = 1;
-    } else if ((pushUpStart==1) && (left_angle > 150) && (right_angle > 150)){
+    } else if ((pushUpStart==1) && (left_angle > 150) && (right_angle > 150)
+            && (left_conf>0.5) && (right_conf>0.5)){
     pushUpCount++;
     pushUpStart = 0;
     }
 
     ui.writePushups(pushUpCount.toFixed());
     console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed())
+    //console.log('LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
     //const classId = (await predictedClass.data())[0];
     img.dispose();
 
@@ -106,7 +111,7 @@ async function predict() {
 async function getImage() {
   const img = await webcam.capture();
   const processedImg =
-      tf.tidy(() => img.resizeBilinear([192, 192]).expandDims(0).toInt());
+      tf.tidy(() => img.resizeBilinear([256, 256]).expandDims(0).toInt());
   img.dispose();
   return processedImg;
 }
@@ -179,7 +184,7 @@ buttonReset.onclick = function() {
 document.getElementById('backend').addEventListener('change', async function() {
   if (this.value=="wasm"){
     setWasmPaths(`${window.location.href}/`);
-    setThreadsCount(2);
+    setThreadsCount(4);
   }
   await tf.setBackend(this.value);
 });
@@ -195,7 +200,7 @@ async function init() {
     console.log(e);
     document.getElementById('no-webcam').style.display = 'block';
   }
-  model = await loadModel();
+  model = await loadModel("thunder");
 
   ui.init();
 }
