@@ -34,6 +34,7 @@ var buttonReset = document.getElementById('button-reset');
 var Interval ;
 const timer = new Timer();
 
+let conf_thresh = 0.5;
 var pushUpStart = 0;
 var pushUpCount = 0;
 
@@ -41,6 +42,7 @@ var pushUpCount = 0;
 let webcam;
 
 let model;
+let source_type = 'webcam';
 
 // Loads detector and returns a model that returns the internal activation
 // we'll use as input to our classifier model.
@@ -85,16 +87,16 @@ async function predict() {
     const left_conf = (results[9][2] + results[7][2] +results[5][2])/3;
     const right_conf = (results[10][2] + results[8][2] +results[8][2])/3;
 
-    if ((left_angle < 110) && (right_angle < 110) && (left_conf>0.5) && (right_conf>0.5)){
+    if ((left_angle < 110) && (right_angle < 110) && (left_conf>conf_thresh) && (right_conf>conf_thresh)){
     pushUpStart = 1;
     } else if ((pushUpStart==1) && (left_angle > 150) && (right_angle > 150)
-            && (left_conf>0.5) && (right_conf>0.5)){
+            && (left_conf>conf_thresh) && (right_conf>conf_thresh)){
     pushUpCount++;
     pushUpStart = 0;
     }
 
     ui.writePushups(pushUpCount.toFixed());
-    console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed())
+    console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
     //console.log('LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
     //const classId = (await predictedClass.data())[0];
     img.dispose();
@@ -109,11 +111,25 @@ async function predict() {
  * returns a batched image (1-element batch) of shape [1, w, h, c].
  */
 async function getImage() {
-  const img = await webcam.capture();
-  const processedImg =
-      tf.tidy(() => img.resizeBilinear([256, 256]).expandDims(0).toInt());
-  img.dispose();
-  return processedImg;
+  if (source_type == 'video'){
+    const img = await tf.browser.fromPixelsAsync(webcam);
+    const processedImg =
+        tf.tidy(() => img.resizeBilinear([192, 192]).expandDims(0).toInt());
+    img.dispose();
+    /* 
+    const result = rgb2rgba(processedImg.squeeze()).dataSync()
+    document.getElementById("canvas").getContext("2d").putImageData(
+        new ImageData(Uint8ClampedArray.from(result), 192, 192), 0, 0);
+    */
+        return processedImg;
+  }
+  else if (source_type == 'webcam'){
+    const img = await webcam.capture();
+    const processedImg =
+        tf.tidy(() => img.resizeBilinear([192, 192]).expandDims(0).toInt());
+    img.dispose();
+    return processedImg;
+  }
 }
 
 function startTimer () {
@@ -156,7 +172,6 @@ async function Start(){
     
     isPredicting = true;
     predict();
-    //console.log(seconds);
 }
 
 async function Stop(){
@@ -167,7 +182,6 @@ async function Stop(){
     clearInterval(Interval);
     timer.stop();
     isPredicting = false;
-    //console.log(seconds);
 }
 
 buttonReset.onclick = function() {
@@ -181,6 +195,38 @@ buttonReset.onclick = function() {
   timer.reset ();
 }
 
+
+document.getElementById('source').addEventListener('change', async function() {
+  if (this.value.substring(0,4)=='demo'){
+    if (webcam.isClosed==false){webcam.stop();}
+    var video = document.getElementById('webcam');
+    var source = document.getElementById('vidsrc');
+    video.pause();
+    video.crossOrigin = "Anonymous";
+    source.setAttribute('src', 'https://hamdi-smartgym.s3.us-east-2.amazonaws.com/demos/'+this.value+'.mp4');
+    video.setAttribute('height', 480);
+    video.setAttribute('width', 852);
+    video.load();
+    video.play();
+    source_type = 'video';
+    webcam = document.getElementById('webcam');
+  }
+  else if (this.value=='webcam'){
+    try {
+      webcam = await tfd.webcam(document.getElementById('webcam'));
+      source_type = 'webcam';
+    } catch (e) {
+      console.log(e);
+      document.getElementById('no-webcam').style.display = 'block';
+    }
+  }
+  else if (this.value=='upload'){
+    //webcam = await tf.browser.fromPixelsAsync(document.getElementById('webcam'));
+    source_type = 'video';
+  }
+});
+
+
 document.getElementById('backend').addEventListener('change', async function() {
   if (this.value=="wasm"){
     setWasmPaths(`${window.location.href}/`);
@@ -192,15 +238,13 @@ document.getElementById('backend').addEventListener('change', async function() {
 
 async function init() {
   try {
-    //const webcamConfig = {
-    //  resizeWidth: 192,
-    //  resizeHeight: 192};
-    webcam = await tfd.webcam(document.getElementById('webcam'));//, webcamConfig);
+    webcam = await tfd.webcam(document.getElementById('webcam'));
   } catch (e) {
     console.log(e);
     document.getElementById('no-webcam').style.display = 'block';
   }
-  model = await loadModel("thunder");
+
+  model = await loadModel("lightning");
 
   ui.init();
 }

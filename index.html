@@ -59,7 +59,20 @@ limitations under the License.
         <!-- Hyper params. -->
         <div class="hyper-params">
 
-          <!-- Beckend -->
+          <!-- Source -->
+          <div class="dropdown">
+            <label>Source</label>
+            <div class="select">
+              <select id="source">
+                <option selected value="webcam">Webcam</option>
+                <option value="demo">Demo 1</option>
+                <option value="demo2">Demo 2</option>
+                <option value="upload">Upload video</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Backend -->
           <div class="dropdown">
             <label>Backend</label>
             <div class="select">
@@ -70,7 +83,7 @@ limitations under the License.
               </select>
             </div>
           </div>
-
+          
           <!-- Batch size -->
           <div class="dropdown" id="dropdown2">
             <label>Batch size</label>
@@ -88,7 +101,9 @@ limitations under the License.
 
         <div class="webcam-box-outer">
           <div class="webcam-box-inner">
-            <video autoplay playsinline muted id="webcam" width="576" height="576"></video>
+            <video autoplay playsinline muted loop id="webcam" width="576" height="576" crossorigin="anonymous">
+              <source id="vidsrc" src="https://hamdi-smartgym.s3.us-east-2.amazonaws.com/demos/demo2.mp4" type="video/mp4">
+            </video>
           </div>
         </div>
 
@@ -97,6 +112,8 @@ limitations under the License.
     </div><!-- /.panel -->
 
   </div><!-- /#controller -->
+
+  <canvas id="canvas" width="192" height="192"></canvas>
 
   <p id="copyright">&copy; Project by Hamdi Bel Hadj Hassine</p>
 

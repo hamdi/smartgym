@@ -14,7 +14,6 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as tf from '@tensorflow/tfjs';
 
 export function init() {
   document.getElementById('controller').style.display = '';
@@ -24,7 +23,10 @@ export function init() {
 const statusElement = document.getElementById('status');
 const pushupsElement = document.getElementById('pushups');
 
-// Set hyper params from UI values.
+// Set params from UI values.
+const sourceElement = document.getElementById('source');
+export const getMode = () => +sourceElement.value;
+
 const backendElement = document.getElementById('backend');
 export const getBackend = () => +backendElement.value;
 
