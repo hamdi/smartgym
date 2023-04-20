@@ -18,43 +18,40 @@
 import * as tf from '@tensorflow/tfjs';
 import {setThreadsCount, setWasmPaths} from '@tensorflow/tfjs-backend-wasm';
 import * as tfd from '@tensorflow/tfjs-data';
+import * as posedetection from '@tensorflow-models/pose-detection';
 
-//import {ControllerDataset} from './controller_dataset';
 import {Timer} from './timer.js';
 import * as ui from './ui';
 
-console.log("app start");
-
 // set button functionality
-var minutes = 00; 
-var seconds = 00; 
-var appendSeconds = document.getElementById("seconds")
-var appendMinutes = document.getElementById("minutes")
-var buttonReset = document.getElementById('button-reset');
-var Interval ;
+let minutes = 00; 
+let seconds = 00; 
+let appendSeconds = document.getElementById("seconds")
+let appendMinutes = document.getElementById("minutes")
+let buttonReset = document.getElementById('button-reset');
+let Interval ;
 const timer = new Timer();
 
-let conf_thresh = 0.5;
-var pushUpStart = 0;
-var pushUpCount = 0;
+let conf_thresh = 0.4;
+let pushUpStart = 0;
+let pushUpCount = 0;
 
 // A webcam iterator that generates Tensors from the images from the webcam.
-let webcam;
+let webcam_iterator;
+let webcam = document.getElementById('webcam');
 
 let model;
-let source_type = 'webcam';
 
 // Loads detector and returns a model that returns the internal activation
 // we'll use as input to our classifier model.
-async function loadModel(model_name) {
-  const detector = await tf.loadGraphModel(
-    'https://storage.googleapis.com/tfjs-models/tfjs/movenet_v4/'+model_name+'/float16/model.json');
+async function loadModel() {
+  const detector = await posedetection.createDetector(posedetection.SupportedModels.MoveNet);
   return detector;
 }
 
 function find_angle(A,B,C) {
-  var AB = Math.sqrt(Math.pow(B.x-A.x,2)+ Math.pow(B.y-A.y,2));    
-  var BC = Math.sqrt(Math.pow(B.x-C.x,2)+ Math.pow(B.y-C.y,2)); 
+  var AB = Math.sqrt(Math.pow(B.x-A.x,2)+ Math.pow(B.y-A.y,2));
+  var BC = Math.sqrt(Math.pow(B.x-C.x,2)+ Math.pow(B.y-C.y,2));
   var AC = Math.sqrt(Math.pow(C.x-A.x,2)+ Math.pow(C.y-A.y,2));
   return ((Math.acos((BC*BC+AB*AB-AC*AC)/(2*BC*AB))* 180) / Math.PI);
 }
@@ -66,70 +63,47 @@ async function predict() {
     
   while (isPredicting) {
     // Capture the frame from the webcam.
-    const img = await getImage();
+    //const img = await getImage();
 
     // Make a prediction through our detector model
-    const results_tensor = model.predict(img);
-    const results_all = await results_tensor.array();
-    const results = results_all[0][0];
+    const pose_results = await model.estimatePoses(webcam);
+    console.log(pose_results);
+    if (pose_results.length>0){
+      const results = await pose_results[0].keypoints;
 
-    // compute elbow angles
-    const left_wrist = {x:results[9][0], y:results[9][1]};
-    const right_wrist = {x:results[10][0], y:results[10][1]};
-    const left_elbow = {x:results[7][0], y:results[7][1]};
-    const right_elbow = {x:results[8][0], y:results[8][1]};
-    const left_shoulder = {x:results[5][0], y:results[5][1]};
-    const right_shoulder = {x:results[6][0], y:results[6][1]};
-
-    const left_angle = find_angle(left_shoulder, left_elbow, left_wrist);
-    const right_angle = find_angle(right_shoulder, right_elbow, right_wrist);
-
-    const left_conf = (results[9][2] + results[7][2] +results[5][2])/3;
-    const right_conf = (results[10][2] + results[8][2] +results[8][2])/3;
-
-    if ((left_angle < 110) && (right_angle < 110) && (left_conf>conf_thresh) && (right_conf>conf_thresh)){
-    pushUpStart = 1;
-    } else if ((pushUpStart==1) && (left_angle > 150) && (right_angle > 150)
-            && (left_conf>conf_thresh) && (right_conf>conf_thresh)){
-    pushUpCount++;
-    pushUpStart = 0;
+      // compute elbow angles
+      const left_wrist = {x:results[9].x, y:results[9].y};
+      const right_wrist = {x:results[10].x, y:results[10].y};
+      const left_elbow = {x:results[7].x, y:results[7].y};
+      const right_elbow = {x:results[8].x, y:results[8].y};
+      const left_shoulder = {x:results[5].x, y:results[5].y};
+      const right_shoulder = {x:results[6].x, y:results[6].y};
+  
+      const left_angle = find_angle(left_shoulder, left_elbow, left_wrist);
+      const right_angle = find_angle(right_shoulder, right_elbow, right_wrist);
+  
+      const left_conf = (results[9].score + results[7].score +results[5].score)/3;
+      const right_conf = (results[10].score + results[8].score +results[8].score)/3;
+      const conf = (left_conf + left_conf) / 2;
+  
+      if ((left_angle < 110) && (right_angle < 110) && (conf>conf_thresh)){
+      pushUpStart = 1;
+      } else if ((pushUpStart==1) && (left_angle > 150) && (right_angle > 150)
+              && (conf>conf_thresh)){
+      pushUpCount++;
+      pushUpStart = 0;
+      }
+  
+      ui.writePushups(pushUpCount.toFixed());
+      console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
+      //console.log('LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
+      //const classId = (await predictedClass.data())[0];
     }
-
-    ui.writePushups(pushUpCount.toFixed());
-    console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
-    //console.log('LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
-    //const classId = (await predictedClass.data())[0];
-    img.dispose();
+    //img.dispose();
 
     await tf.nextFrame();
   }
   ui.donePredicting();
-}
-
-/**
- * Captures a frame from the webcam then
- * returns a batched image (1-element batch) of shape [1, w, h, c].
- */
-async function getImage() {
-  if (source_type == 'video'){
-    const img = await tf.browser.fromPixelsAsync(webcam);
-    const processedImg =
-        tf.tidy(() => img.resizeBilinear([192, 192]).expandDims(0).toInt());
-    img.dispose();
-    /* 
-    const result = rgb2rgba(processedImg.squeeze()).dataSync()
-    document.getElementById("canvas").getContext("2d").putImageData(
-        new ImageData(Uint8ClampedArray.from(result), 192, 192), 0, 0);
-    */
-        return processedImg;
-  }
-  else if (source_type == 'webcam'){
-    const img = await webcam.capture();
-    const processedImg =
-        tf.tidy(() => img.resizeBilinear([192, 192]).expandDims(0).toInt());
-    img.dispose();
-    return processedImg;
-  }
 }
 
 function startTimer () {
@@ -198,7 +172,7 @@ buttonReset.onclick = function() {
 
 document.getElementById('source').addEventListener('change', async function() {
   if (this.value.substring(0,4)=='demo'){
-    if (webcam.isClosed==false){webcam.stop();}
+    if (webcam_iterator.isClosed==false){webcam_iterator.stop();}
     var video = document.getElementById('webcam');
     var source = document.getElementById('vidsrc');
     video.pause();
@@ -208,13 +182,11 @@ document.getElementById('source').addEventListener('change', async function() {
     video.setAttribute('width', 852);
     video.load();
     video.play();
-    source_type = 'video';
     webcam = document.getElementById('webcam');
   }
   else if (this.value=='webcam'){
     try {
-      webcam = await tfd.webcam(document.getElementById('webcam'));
-      source_type = 'webcam';
+      webcam_iterator = await tfd.webcam(document.getElementById('webcam'));
     } catch (e) {
       console.log(e);
       document.getElementById('no-webcam').style.display = 'block';
@@ -222,7 +194,6 @@ document.getElementById('source').addEventListener('change', async function() {
   }
   else if (this.value=='upload'){
     //webcam = await tf.browser.fromPixelsAsync(document.getElementById('webcam'));
-    source_type = 'video';
   }
 });
 
@@ -238,13 +209,13 @@ document.getElementById('backend').addEventListener('change', async function() {
 
 async function init() {
   try {
-    webcam = await tfd.webcam(document.getElementById('webcam'));
+    webcam_iterator = await tfd.webcam(document.getElementById('webcam'));
   } catch (e) {
     console.log(e);
     document.getElementById('no-webcam').style.display = 'block';
   }
 
-  model = await loadModel("lightning");
+  model = await loadModel();
 
   ui.init();
 }

@@ -5,8 +5,12 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
+    "@mediapipe/pose": "^0.5.1675469404",
+    "@tensorflow-models/pose-detection": "^2.1.0",
     "@tensorflow/tfjs": "^4.4.0",
     "@tensorflow/tfjs-backend-wasm": "^4.4.0",
+    "@tensorflow/tfjs-converter": "^4.4.0",
+    "@tensorflow/tfjs-core": "^4.4.0",
     "parcel-reporter-static-files-copy": "^1.5.0"
   },
   "scripts": {
