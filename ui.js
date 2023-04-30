@@ -38,3 +38,23 @@ export function writeStatus(status) {
 export function writePushups(n_pushups) {
   pushupsElement.innerText = n_pushups;
 }
+
+// Leaderboard toggle button
+const lbButton = document.getElementById("leaderboard");
+const lbFrame = document.getElementById("frame");
+lbButton.addEventListener("click", toggleIframe);
+
+function toggleIframe(){
+  lbButton.classList.toggle("opened");
+  if(lbButton.classList.contains("opened")){
+    lbFrame.src = "lb.html";
+    lbFrame.addEventListener("load", function() {
+      window.frames['lbframe'].document.getElementById('exit').addEventListener("click", toggleIframe);
+    });
+    lbButton.innerHTML = "Close Leaderboard";
+  }
+  else{
+    lbButton.innerHTML = "Leaderboard";
+  }
+  lbFrame.classList.toggle("d-none");
+}

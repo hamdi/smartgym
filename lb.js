@@ -1,9 +1,4 @@
 let req_res;
-let exitButton = document.getElementById("exit");
-
-exitButton.onclick = function() {
-  close();
-}
 
 function addRows(nb, name, pts) {
   var table = document.getElementById( 'lbTable' ),

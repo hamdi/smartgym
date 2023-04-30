@@ -209,23 +209,6 @@ async function init() {
 
   ui.init();
 
-const btn = document.getElementById("leaderboard");
-const frame = document.getElementById("frame");
-
-btn.addEventListener("click", toggleIframe);
-
-function toggleIframe(){
-  frame.classList.toggle("d-none");
-  btn.classList.toggle("opened");
-  if(btn.classList.contains("opened")){
-    btn.innerHTML = "Close Leaderboard";
-    window.frames['lbframe'].document.getElementById('exit').addEventListener("click", toggleIframe);
-  }
-  else{
-    btn.innerHTML = "Leaderboard";
-  }
-}
-
 }
 
 // Initialize the application.

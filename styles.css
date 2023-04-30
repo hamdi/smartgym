@@ -31,7 +31,7 @@ button:focus {
 
 /** Page header. **/
 header {
-  background-color: #ef6c00;
+  background-color: #6D67E4;
   border-bottom: solid 1px rgba(0,0,0,0.4);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   color: rgba(255, 255, 255, 0.7);
@@ -166,9 +166,8 @@ button:hover {
   -webkit-transition: all 0.5s ease-in-out;
   -moz-transition: all 0.5s ease-in-out;
   transition: all 0.5s ease-in-out;
-  background: #fff;
-  border: solid 1px #fff;
-  color: #2a2a2a;
+  background: #6D67E4;
+  border: solid 1px #6D67E4;
 }
 .params-webcam-row {
   align-items: center;
@@ -198,10 +197,11 @@ button:hover {
   height: 480px;
   transform: scaleX(-1);
 }
-.hyper-params {
+.params {
   display: flex;
   flex-direction: column;
   margin-top: 12px;
+  align-items: center;
 }
 .dropdown {
   flex-direction: column;
@@ -222,11 +222,11 @@ button:hover {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background: none;
+  background: #313131;
   border: none;
   border-bottom: solid 1px #313131;
   border-radius: 0;
-  color: #c9c9c9;
+  color: #e8e8e8;
   display: block;
   font-size: 12px;
   outline: none;
@@ -235,7 +235,7 @@ button:hover {
 }
 .dropdown .select::after {
   content: "arrow_drop_down";
-  color: #999;
+  color: #777;
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
@@ -257,7 +257,7 @@ button:hover {
 #copyright {
   color: #f8f8f8;
   font-weight: 300;
-  margin: 12px 0;
+  margin: 8px 0;
   text-align: center;
 }
 
@@ -281,8 +281,29 @@ button:hover {
 #maintext {
   font-size: 1.8em;
 }
-#dropdown2 {
-  visibility: hidden;
+#leaderboard {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  -khtml-border-radius: 5px;
+  background: #2a2a2a;
+  color: #fff;
+  border: solid 1px #fff;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 8px 8px;
+  width: 100%;
+  margin: -3 0 8 0px;
+  outline: none;
 }
-
+#leaderboard:hover {
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+  background: #6D67E4;
+  border: solid 1px #6D67E4;
+}
 .d-none{ display:none; }
