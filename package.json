@@ -14,8 +14,8 @@
     "parcel-reporter-static-files-copy": "^1.5.0"
   },
   "scripts": {
-    "watch": "cross-env NODE_ENV=development parcel index.html --no-hmr --open",
-    "build": "cross-env NODE_ENV=production parcel build --no-scope-hoist index.html --public-url ./",
+    "watch": "cross-env NODE_ENV=development parcel './*.html' --no-hmr --open",
+    "build": "cross-env NODE_ENV=production parcel build --no-scope-hoist './*.html' --public-url ./",
     "link-local": "yalc link"
   },
   "devDependencies": {

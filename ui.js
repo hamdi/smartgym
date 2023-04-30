@@ -30,17 +30,8 @@ export const getMode = () => +sourceElement.value;
 const backendElement = document.getElementById('backend');
 export const getBackend = () => +backendElement.value;
 
-const batchSizeFractionElement = document.getElementById('batchSizeFraction');
-export const getBatchSizeFraction = () => +batchSizeFractionElement.value;
-
 const LoadingElement = document.getElementById('loadingStatus');
 
-export function isPredicting() {
-  LoadingElement.style.visibility = 'visible';
-}
-export function donePredicting() {
-  LoadingElement.style.visibility = 'hidden';
-}
 export function writeStatus(status) {
   statusElement.innerText = status;
 }

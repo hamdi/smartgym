@@ -23,7 +23,10 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 import {Timer} from './timer.js';
 import * as ui from './ui';
 
-// set button functionality
+// Config
+let conf_thresh = 0.4;
+
+// Variables initialization
 let minutes = 00; 
 let seconds = 00; 
 let appendSeconds = document.getElementById("seconds")
@@ -32,23 +35,22 @@ let buttonReset = document.getElementById('button-reset');
 let Interval ;
 const timer = new Timer();
 
-let conf_thresh = 0.4;
 let pushUpStart = 0;
 let pushUpCount = 0;
+let isPredicting = false;
 
-// A webcam iterator that generates Tensors from the images from the webcam.
-let webcam_iterator;
 let webcam = document.getElementById('webcam');
+let webcam_iterator;
 
 let model;
 
-// Loads detector and returns a model that returns the internal activation
-// we'll use as input to our classifier model.
+// To load the model
 async function loadModel() {
   const detector = await posedetection.createDetector(posedetection.SupportedModels.MoveNet);
   return detector;
 }
 
+// To find the angle between 3 points
 function find_angle(A,B,C) {
   var AB = Math.sqrt(Math.pow(B.x-A.x,2)+ Math.pow(B.y-A.y,2));
   var BC = Math.sqrt(Math.pow(B.x-C.x,2)+ Math.pow(B.y-C.y,2));
@@ -56,18 +58,11 @@ function find_angle(A,B,C) {
   return ((Math.acos((BC*BC+AB*AB-AC*AC)/(2*BC*AB))* 180) / Math.PI);
 }
 
-let isPredicting = false;
-
 async function predict() {
-  ui.isPredicting();
     
   while (isPredicting) {
-    // Capture the frame from the webcam.
-    //const img = await getImage();
-
     // Make a prediction through our detector model
     const pose_results = await model.estimatePoses(webcam);
-    console.log(pose_results);
     if (pose_results.length>0){
       const results = await pose_results[0].keypoints;
 
@@ -95,15 +90,10 @@ async function predict() {
       }
   
       ui.writePushups(pushUpCount.toFixed());
-      console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
-      //console.log('LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
-      //const classId = (await predictedClass.data())[0];
+      //console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
     }
-    //img.dispose();
-
     await tf.nextFrame();
   }
-  ui.donePredicting();
 }
 
 function startTimer () {
@@ -125,7 +115,6 @@ function startTimer () {
     else if (seconds < 5 && minutes > 9){
       appendMinutes.innerHTML = minutes;
     } 
-
 }
 }
 
@@ -172,16 +161,15 @@ buttonReset.onclick = function() {
 
 document.getElementById('source').addEventListener('change', async function() {
   if (this.value.substring(0,4)=='demo'){
-    if (webcam_iterator.isClosed==false){webcam_iterator.stop();}
-    var video = document.getElementById('webcam');
+    if ((webcam_iterator!=null) && (webcam_iterator.isClosed==false)){webcam_iterator.stop();}
     var source = document.getElementById('vidsrc');
-    video.pause();
-    video.crossOrigin = "Anonymous";
+    webcam.pause();
+    webcam.crossOrigin = "Anonymous";
     source.setAttribute('src', 'https://hamdi-smartgym.s3.us-east-2.amazonaws.com/demos/'+this.value+'.mp4');
-    video.setAttribute('height', 480);
-    video.setAttribute('width', 852);
-    video.load();
-    video.play();
+    webcam.setAttribute('height', 480);
+    webcam.setAttribute('width', 852);
+    webcam.load();
+    webcam.play();
     webcam = document.getElementById('webcam');
   }
   else if (this.value=='webcam'){
@@ -191,6 +179,7 @@ document.getElementById('source').addEventListener('change', async function() {
       console.log(e);
       document.getElementById('no-webcam').style.display = 'block';
     }
+    
   }
   else if (this.value=='upload'){
     //webcam = await tf.browser.fromPixelsAsync(document.getElementById('webcam'));
@@ -207,6 +196,7 @@ document.getElementById('backend').addEventListener('change', async function() {
 });
 
 
+
 async function init() {
   try {
     webcam_iterator = await tfd.webcam(document.getElementById('webcam'));
@@ -218,6 +208,24 @@ async function init() {
   model = await loadModel();
 
   ui.init();
+
+const btn = document.getElementById("leaderboard");
+const frame = document.getElementById("frame");
+
+btn.addEventListener("click", toggleIframe);
+
+function toggleIframe(){
+  frame.classList.toggle("d-none");
+  btn.classList.toggle("opened");
+  if(btn.classList.contains("opened")){
+    btn.innerHTML = "Close Leaderboard";
+    window.frames['lbframe'].document.getElementById('exit').addEventListener("click", toggleIframe);
+  }
+  else{
+    btn.innerHTML = "Leaderboard";
+  }
+}
+
 }
 
 // Initialize the application.

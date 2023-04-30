@@ -192,7 +192,7 @@ button:hover {
   display: flex;
   justify-content: center;
   overflow: hidden;
-  width: 576px;
+  width: 100%;
 }
 #webcam {
   height: 480px;
@@ -284,3 +284,5 @@ button:hover {
 #dropdown2 {
   visibility: hidden;
 }
+
+.d-none{ display:none; }
