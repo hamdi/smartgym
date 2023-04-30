@@ -163,12 +163,32 @@ saveButton.addEventListener("click", Save);
 
 async function Save(){
   const rndInt = Math.floor(Math.random() * 1000)
-  const username = prompt("Please enter your username.\nNote: It will be publicly visible in the leaderboard.", "Anonymous"+rndInt);
-  const req_body = {name: username, score: pushUpCount};
-  const response = await fetch('https://f2r1su6iai.execute-api.eu-west-1.amazonaws.com/deploy',
-    {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(req_body)});
-  const data = await response.json();
-  console.log(data);
+  const { value: username } = await Swal.fire({
+    title: 'Enter your username',
+    input: 'text',
+    inputLabel: 'Note: It will be publicly visible in the leaderboard.',
+    inputValue: "Anonymous"+rndInt,
+    showCancelButton: true,
+    inputValidator: (value) => {
+      if (!value) {
+        return 'You need to write something!'
+      }
+    }
+  })
+  console.log(username);
+
+  //const username = prompt("Please enter your username.\nNote: It will be publicly visible in the leaderboard.", "Anonymous"+rndInt);
+  if (username!=null){
+    const req_body = JSON.stringify({name: username, score: pushUpCount});
+    console.log(req_body);
+    const response = await fetch('https://f2r1su6iai.execute-api.eu-west-1.amazonaws.com/deploy',
+      {method: 'POST', headers: {'Content-Type': 'application/json'}, body: req_body});
+    Swal.fire(
+      'Score submitted!',
+      'Head to the leaderboard to check if your submission was accepted!',
+      'success'
+    )
+  }
 }
 
 
