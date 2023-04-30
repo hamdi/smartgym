@@ -158,6 +158,19 @@ buttonReset.onclick = function() {
   timer.reset ();
 }
 
+const saveButton = document.getElementById("button-save");
+saveButton.addEventListener("click", Save);
+
+async function Save(){
+  const rndInt = Math.floor(Math.random() * 1000)
+  const username = prompt("Please enter your username.\nNote: It will be publicly visible in the leaderboard.", "Anonymous"+rndInt);
+  const req_body = {name: username, score: pushUpCount};
+  const response = await fetch('https://f2r1su6iai.execute-api.eu-west-1.amazonaws.com/deploy',
+    {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(req_body)});
+  const data = await response.json();
+  console.log(data);
+}
+
 
 document.getElementById('source').addEventListener('change', async function() {
   if (this.value.substring(0,4)=='demo'){
