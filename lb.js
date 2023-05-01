@@ -38,5 +38,7 @@ var promise1 = new Promise(function(resolve, reject) {
     for (let i = 1; i < req_res.length; i++) {
       addRows(i+1, req_res[i][0], req_res[i][1]);
     }
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('main').style.display = '';
   });
 
