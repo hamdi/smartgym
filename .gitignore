@@ -12,6 +12,7 @@ lib/
 .idea/
 *.min.js
 thrown_code
+.env
 # Logs
 logs/
 *.log

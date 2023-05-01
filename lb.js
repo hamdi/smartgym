@@ -20,6 +20,7 @@ var promise1 = new Promise(function(resolve, reject) {
       method = "GET",
       url = "https://f2r1su6iai.execute-api.eu-west-1.amazonaws.com/deploy";
     xhr.open(method, url, true);
+    xhr.setRequestHeader("x-api-key", process.env.API_KEY);
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
         resolve(JSON.parse(xhr.responseText));

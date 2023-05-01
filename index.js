@@ -79,7 +79,7 @@ async function predict() {
   
       const left_conf = (results[9].score + results[7].score +results[5].score)/3;
       const right_conf = (results[10].score + results[8].score +results[8].score)/3;
-      const conf = (left_conf + left_conf) / 2;
+      const conf = (left_conf + right_conf) / 2;
   
       if ((left_angle < 110) && (right_angle < 110) && (conf>conf_thresh)){
       pushUpStart = 1;
@@ -179,7 +179,11 @@ async function Save(){
   if (username!=null){
     const req_body = JSON.stringify({name: username, score: pushUpCount});
     const response = await fetch('https://f2r1su6iai.execute-api.eu-west-1.amazonaws.com/deploy',
-      {method: 'POST', headers: {'Content-Type': 'application/json'}, body: req_body});
+      {
+        method: 'POST',
+        headers: {'x-api-key': process.env.API_KEY, 'Content-Type': 'application/json'},
+        body: req_body
+      });
     Swal.fire(
       'Score submitted!',
       'Head to the leaderboard to check if your submission was accepted!',
