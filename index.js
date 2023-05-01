@@ -78,7 +78,7 @@ async function predict() {
       const right_angle = find_angle(right_shoulder, right_elbow, right_wrist);
   
       const left_conf = (results[9].score + results[7].score +results[5].score)/3;
-      const right_conf = (results[10].score + results[8].score +results[8].score)/3;
+      const right_conf = (results[10].score + results[8].score +results[6].score)/3;
       const conf = (left_conf + right_conf) / 2;
   
       if ((left_angle < 110) && (right_angle < 110) && (conf>conf_thresh)){
@@ -90,7 +90,7 @@ async function predict() {
       }
   
       ui.writePushups(pushUpCount.toFixed());
-      //console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2))
+      //console.log('LA:' + left_angle.toFixed() + ' RA: ' + right_angle.toFixed() + ' LC:' + left_conf.toFixed(2) + ' RC: ' + right_conf.toFixed(2));
     }
     await tf.nextFrame();
   }
@@ -188,7 +188,7 @@ async function Save(){
       'Score submitted!',
       'Head to the leaderboard to check if your submission was accepted!',
       'success'
-    )
+    );
   }
 }
 
