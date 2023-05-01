@@ -175,12 +175,9 @@ async function Save(){
       }
     }
   })
-  console.log(username);
 
-  //const username = prompt("Please enter your username.\nNote: It will be publicly visible in the leaderboard.", "Anonymous"+rndInt);
   if (username!=null){
     const req_body = JSON.stringify({name: username, score: pushUpCount});
-    console.log(req_body);
     const response = await fetch('https://f2r1su6iai.execute-api.eu-west-1.amazonaws.com/deploy',
       {method: 'POST', headers: {'Content-Type': 'application/json'}, body: req_body});
     Swal.fire(
@@ -193,6 +190,7 @@ async function Save(){
 
 
 document.getElementById('source').addEventListener('change', async function() {
+  if (isPredicting) {Stop();}
   if (this.value.substring(0,4)=='demo'){
     if ((webcam_iterator!=null) && (webcam_iterator.isClosed==false)){webcam_iterator.stop();}
     var source = document.getElementById('vidsrc');
@@ -215,7 +213,51 @@ document.getElementById('source').addEventListener('change', async function() {
     
   }
   else if (this.value=='upload'){
-    //webcam = await tf.browser.fromPixelsAsync(document.getElementById('webcam'));
+    const { value: file } = await Swal.fire({
+      title: 'Select video',
+      input: 'file',
+      inputAttributes: {
+        'accept': 'video/*',
+        'aria-label': 'Try this demo with an uploaded video'
+      }
+    })
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'bottom-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+    if (file && file.type.match('video.*')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        Toast.fire({
+          icon: 'success',
+          title: 'Video uploaded successfully'
+        });
+        if ((webcam_iterator!=null) && (webcam_iterator.isClosed==false)){webcam_iterator.stop();}
+        var source = document.getElementById('vidsrc');
+        webcam.pause();
+        webcam.crossOrigin = "Anonymous";
+        source.setAttribute('src', e.target.result);
+        webcam.setAttribute('height', 480);
+        webcam.setAttribute('width', 852);
+        webcam.load();
+        webcam.play();
+        webcam = document.getElementById('webcam');
+      }
+      reader.readAsDataURL(file);
+    }
+    else if (file) {
+      Toast.fire({
+        icon: 'error',
+        title: 'File not recognized'
+      });
+    }
   }
 });
 
